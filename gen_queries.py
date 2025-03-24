@@ -14,7 +14,7 @@ It's because 68.10 is mathematically equal to 68.1 but they are different versio
 def versionToESRs(version):
     version = int(version)
 
-    knownESRs = [60, 68, 78, 91, 102, 115, 128]
+    knownESRs = [60, 68, 78, 91, 102, 115, 128, 140]
     twoESRVersions = []
     for x in knownESRs:
         twoESRVersions.append(x)
@@ -22,7 +22,7 @@ def versionToESRs(version):
         # We have a three-release overlap post-78 due to shortened release cycles
         if x >= 78:
             twoESRVersions.append(x+2)
-    for x in range(131, 137):
+    for x in range(131, 143):
         twoESRVersions.append(x)
 
     twoESRs = True if version in twoESRVersions else False
@@ -61,7 +61,8 @@ def sanityCheck():
         (129, ["115.14", "128.1"]),
         (132, ["115.17", "128.4"]),
         (136, ["115.21", "128.8"]),
-        (137, ["128.9"])
+        (137, ["115.22", "128.9"]),
+        #(142, ["115.27", "128.14", "140.2"])
     ]
     for e in expected:
         if versionToESRs(e[0]) != e[1]:
