@@ -31,7 +31,7 @@ if __name__ == "__main__":
     mainVersion = args.version
     allEsrVersions = versionToESRs(args.version)
     if len(allEsrVersions) > 1:
-        assert len(allEsrVersions) <= 2
+        assert len(allEsrVersions) <= 3
         if args.esr <= len(allEsrVersions):
             esrVersion = str(allEsrVersions[args.esr - 1])
         else:

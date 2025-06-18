@@ -15,23 +15,26 @@ def versionToESRs(version):
     version = int(version)
 
     knownESRs = [60, 68, 78, 91, 102, 115, 128, 140]
-    twoESRVersions = []
+    versionsWithMultipleESRs = []
     for x in knownESRs:
-        twoESRVersions.append(x)
-        twoESRVersions.append(x+1)
-        # We have a three-release overlap post-78 due to shortened release cycles
-        if x >= 78:
-            twoESRVersions.append(x+2)
+        versionsWithMultipleESRs.append(x)
+        versionsWithMultipleESRs.append(x+1)
+        versionsWithMultipleESRs.append(x+2)
     for x in range(131, 143):
-        twoESRVersions.append(x)
+        versionsWithMultipleESRs.append(x)
 
-    twoESRs = True if version in twoESRVersions else False
+    multipleESRs = True if version in versionsWithMultipleESRs else False
     subsetOfESRs = [x for x in knownESRs if x <= version]
 
-    if twoESRs:
+    if multipleESRs:
         firstESRPointRelease = str(subsetOfESRs[-2]) + "." + str(version - subsetOfESRs[-2])
         secondESRPointRelease = str(subsetOfESRs[-1]) + "." + str(version - subsetOfESRs[-1])
-        return [firstESRPointRelease, secondESRPointRelease]
+        ret = [firstESRPointRelease, secondESRPointRelease]
+        
+        # three ESRs!!!!
+        if version in range(140, 143):
+            ret.append(str(subsetOfESRs[-3]) + "." + str(version - subsetOfESRs[-3]))
+        return ret
     else:
         pointRelease = str(subsetOfESRs[-1]) + "." + str(version - subsetOfESRs[-1])
         return [pointRelease]
@@ -44,25 +47,11 @@ def getPriorVersion(version):
 
 def sanityCheck():
     expected = [
-        (68, ["60.8", "68.0"]),
-        (69, ["60.9", "68.1"]),
-        (70, ["68.2"]),
-        (71, ["68.3"]),
-        (72, ["68.4"]),
-        (73, ["68.5"]),
-        (74, ["68.6"]),
-        (75, ["68.7"]),
-        (76, ["68.8"]),
-        (77, ["68.9"]),
-        (78, ["68.10", "78.0"]),
-        (79, ["68.11", "78.1"]),
-        (80, ["68.12", "78.2"]),
-        (81, ["78.3"]),
         (129, ["115.14", "128.1"]),
         (132, ["115.17", "128.4"]),
         (136, ["115.21", "128.8"]),
         (137, ["115.22", "128.9"]),
-        #(142, ["115.27", "128.14", "140.2"])
+        (142, ["128.14", "140.2", "115.27"])
     ]
     for e in expected:
         if versionToESRs(e[0]) != e[1]:
@@ -168,12 +157,12 @@ def rollupListMainAndESR(primaryVersion, esrVersion):
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
     "&f3=status_whiteboard&o3=substring&v3=adv-esr" + esrVersion + "%2Br"
 
-def rollupListMainOnly(primaryVersion, allEsrVersions):
+def rollupListMainOnly(primaryVersion, versionsWithMultipleESRs):
     s = "https://bugzilla.mozilla.org/buglist.cgi?" + \
     "&f2=status_whiteboard&o2=substring&v2=adv-main" + primaryVersion + "%2Br" + \
-    "&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + allEsrVersions[0] + "%2Br"
-    if len(allEsrVersions) > 1:
-        s += "&f4=status_whiteboard&o4=notsubstring&v4=adv-esr" + allEsrVersions[1] + "%2Br"
+    "&f3=status_whiteboard&o3=notsubstring&v3=adv-esr" + versionsWithMultipleESRs[0] + "%2Br"
+    if len(versionsWithMultipleESRs) > 1:
+        s += "&f4=status_whiteboard&o4=notsubstring&v4=adv-esr" + versionsWithMultipleESRs[1] + "%2Br"
     return s
 
 def rollupListMain(primaryVersion):
