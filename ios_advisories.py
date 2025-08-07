@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--verbose', '-v', action='store_true', help='print(out debugging info')
     parser.add_argument('version', help='Version to generate queries for.')
     parser.add_argument('--product', choices=['firefox', 'focus'], help='Filter advisories by product (Firefox or Focus).')
-    parser.add_argument('--cve', choices=['skip', 'check'], help='Check for missing CVEs (pass \'skip\' to bypass CVE check and output YAML).')
+    parser.add_argument('--yaml', choices=['force', 'safe'], help='Optionally force YAML output even if issues are detected (by passing \'force\').')
     args = parser.parse_args(sys.argv[1:])
     if not APIKEY:
         eprint("API Key not defined in apikey.py")
@@ -43,8 +43,8 @@ if __name__ == "__main__":
         eprint("No bugs found in Bugzilla for version", version, "- have a nice day!")
         sys.exit(0)
     if not sanityCheckBugs(bugs, require_cves=True):
-        if args.cve == 'skip':
-            eprint("Warning: CVE check failed, but proceeding due to --cve=skip")
+        if args.yaml == 'force':
+            eprint("Warning: issues detected, but proceeding due to --yaml=force")
         else:
             eprint("It looks like there are oddities related to the bugs for version", version, ". You will need to resolve these to continue.")
             sys.exit(1)
