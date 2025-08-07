@@ -22,6 +22,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate a security release .yml')
     parser.add_argument('--verbose', '-v', action='store_true', help='print(out debugging info')
     parser.add_argument('version', help='Version to generate queries for.')
+    parser.add_argument('--product', choices=['firefox', 'focus'], help='Filter advisories by product (Firefox or Focus).')
     args = parser.parse_args(sys.argv[1:])
     if not APIKEY:
         eprint("API Key not defined in apikey.py")
@@ -30,7 +31,10 @@ if __name__ == "__main__":
 
     version = str(args.version)
 
-    eprint("Generating advisories for Firefox for iOS Version", version)
+    prodStr = "Focus" if args.product == "focus" else "Firefox for iOS"
+    advNameStr = "Focus for iOS" if args.product == "focus" else "Firefox for iOS"
+
+    eprint("Generating advisories for " + advNameStr + " Version", version)
 
     # Non-rollup bugs
     bugs = getBugs(version)
@@ -43,7 +47,10 @@ if __name__ == "__main__":
 
     advisories = []
     for b in bugs:
-        advisories.append(Advisory(b, getAdvisoryAttachment(b['id'])))
+        a = Advisory(b, getAdvisoryAttachment(b['id']))
+        if args.product and a.getProduct() != prodStr:
+            continue
+        advisories.append(a)
 
     maxSeverity = "low"
     for a in advisories:
@@ -53,8 +60,8 @@ if __name__ == "__main__":
     print("announced: FIXME <Month> <Day of Month>, <Year>")
     print("impact:", maxSeverity)
     print("fixed_in:")
-    print("- Firefox for iOS " + version)
-    print("title: Security Vulnerabilities fixed in Firefox for iOS " + version)
+    print("- " + advNameStr + " " + version)
+    print("title: Security Vulnerabilities fixed in " + advNameStr + " " + version)
 
     print("advisories:")
     for a in sortAdvisories(advisories):
